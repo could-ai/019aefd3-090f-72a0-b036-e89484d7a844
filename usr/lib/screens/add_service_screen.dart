@@ -14,6 +14,7 @@ class _AddServiceScreenState extends State<AddServiceScreen> {
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
   final _cityController = TextEditingController();
+  final _countryController = TextEditingController();
   
   String _selectedCategory = 'Plumber';
   final List<String> _categories = ['Plumber', 'Electrician', 'AC Technician', 'Cleaning'];
@@ -23,6 +24,7 @@ class _AddServiceScreenState extends State<AddServiceScreen> {
     _nameController.dispose();
     _phoneController.dispose();
     _cityController.dispose();
+    _countryController.dispose();
     super.dispose();
   }
 
@@ -33,6 +35,7 @@ class _AddServiceScreenState extends State<AddServiceScreen> {
         name: _nameController.text,
         phone: _phoneController.text,
         city: _cityController.text,
+        country: _countryController.text,
         category: _selectedCategory,
       );
 
@@ -117,6 +120,26 @@ class _AddServiceScreenState extends State<AddServiceScreen> {
                   }
                   if (value.length < 10) {
                     return 'Please enter a valid phone number';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 20),
+
+              // Country Field
+              TextFormField(
+                controller: _countryController,
+                decoration: const InputDecoration(
+                  labelText: 'Country',
+                  prefixIcon: Icon(Icons.public, color: Colors.red),
+                  border: OutlineInputBorder(),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.red, width: 2),
+                  ),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your country';
                   }
                   return null;
                 },

@@ -3,6 +3,7 @@ class Technician {
   final String name;
   final String phone;
   final String city;
+  final String country;
   final String category;
 
   Technician({
@@ -10,6 +11,7 @@ class Technician {
     required this.name,
     required this.phone,
     required this.city,
+    required this.country,
     required this.category,
   });
 }

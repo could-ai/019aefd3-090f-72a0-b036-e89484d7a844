@@ -17,7 +17,9 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
   List<Technician> _allTechnicians = [];
   List<Technician> _filteredTechnicians = [];
   String? _selectedCity;
+  String? _selectedCountry;
   List<String> _cities = [];
+  List<String> _countries = [];
 
   @override
   void initState() {
@@ -28,18 +30,17 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
   void _loadData() {
     _allTechnicians = _dataService.getTechniciansByCategory(widget.categoryName);
     _cities = _dataService.getCities();
+    _countries = _dataService.getCountries();
     _filterData();
   }
 
   void _filterData() {
     setState(() {
-      if (_selectedCity == null || _selectedCity == 'All Cities') {
-        _filteredTechnicians = _allTechnicians;
-      } else {
-        _filteredTechnicians = _allTechnicians
-            .where((t) => t.city.toLowerCase() == _selectedCity!.toLowerCase())
-            .toList();
-      }
+      _filteredTechnicians = _allTechnicians.where((t) {
+        final matchesCity = _selectedCity == null || _selectedCity == 'All Cities' || t.city.toLowerCase() == _selectedCity!.toLowerCase();
+        final matchesCountry = _selectedCountry == null || _selectedCountry == 'All Countries' || t.country.toLowerCase() == _selectedCountry!.toLowerCase();
+        return matchesCity && matchesCountry;
+      }).toList();
     });
   }
 
@@ -75,41 +76,82 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
       ),
       body: Column(
         children: [
-          // City Filter
+          // Filters Container
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             color: Colors.red.shade50,
-            child: Row(
+            child: Column(
               children: [
-                const Icon(Icons.location_on, color: Colors.red),
-                const SizedBox(width: 10),
-                const Text('Filter by City: ', style: TextStyle(fontWeight: FontWeight.bold)),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: DropdownButton<String>(
-                    value: _selectedCity,
-                    hint: const Text('All Cities'),
-                    isExpanded: true,
-                    underline: Container(height: 1, color: Colors.red),
-                    items: [
-                      const DropdownMenuItem(
-                        value: 'All Cities',
-                        child: Text('All Cities'),
+                // Country Filter
+                Row(
+                  children: [
+                    const Icon(Icons.public, color: Colors.red),
+                    const SizedBox(width: 10),
+                    const Text('Country: ', style: TextStyle(fontWeight: FontWeight.bold)),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: DropdownButton<String>(
+                        value: _selectedCountry,
+                        hint: const Text('All Countries'),
+                        isExpanded: true,
+                        underline: Container(height: 1, color: Colors.red),
+                        items: [
+                          const DropdownMenuItem(
+                            value: 'All Countries',
+                            child: Text('All Countries'),
+                          ),
+                          ..._countries.map((String country) {
+                            return DropdownMenuItem(
+                              value: country,
+                              child: Text(country),
+                            );
+                          }),
+                        ],
+                        onChanged: (String? newValue) {
+                          setState(() {
+                            _selectedCountry = newValue;
+                            _filterData();
+                          });
+                        },
                       ),
-                      ..._cities.map((String city) {
-                        return DropdownMenuItem(
-                          value: city,
-                          child: Text(city),
-                        );
-                      }),
-                    ],
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        _selectedCity = newValue;
-                        _filterData();
-                      });
-                    },
-                  ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                // City Filter
+                Row(
+                  children: [
+                    const Icon(Icons.location_on, color: Colors.red),
+                    const SizedBox(width: 10),
+                    const Text('City:        ', style: TextStyle(fontWeight: FontWeight.bold)), // Spacing to align with Country
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: DropdownButton<String>(
+                        value: _selectedCity,
+                        hint: const Text('All Cities'),
+                        isExpanded: true,
+                        underline: Container(height: 1, color: Colors.red),
+                        items: [
+                          const DropdownMenuItem(
+                            value: 'All Cities',
+                            child: Text('All Cities'),
+                          ),
+                          ..._cities.map((String city) {
+                            return DropdownMenuItem(
+                              value: city,
+                              child: Text(city),
+                            );
+                          }),
+                        ],
+                        onChanged: (String? newValue) {
+                          setState(() {
+                            _selectedCity = newValue;
+                            _filterData();
+                          });
+                        },
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -125,7 +167,7 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
                         Icon(Icons.search_off, size: 64, color: Colors.grey[400]),
                         const SizedBox(height: 16),
                         Text(
-                          'No ${_selectedCity ?? ""} ${widget.categoryName}s found.',
+                          'No ${widget.categoryName}s found.',
                           style: TextStyle(color: Colors.grey[600]),
                         ),
                       ],
@@ -175,7 +217,7 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
                                         const Icon(Icons.location_city, size: 14, color: Colors.grey),
                                         const SizedBox(width: 4),
                                         Text(
-                                          tech.city,
+                                          '${tech.city}, ${tech.country}',
                                           style: TextStyle(color: Colors.grey[600]),
                                         ),
                                       ],
